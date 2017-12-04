@@ -95,9 +95,9 @@ def main():
 						ans_typ = struct.unpack('!H', data[:2])[0]
 						ans_numsq = struct.unpack('!I', data[2:6])[0]
 						if(ans_typ == 9 and ans_numsq == numsq):
-							length = len(data[6:])
-							#ans_value = data[6:].decode()
+							ans_value = data[6:].decode()
 							#print(ans_value, ans_address[0],':',ans_address[1])
+							print(ans_value)
 						else:
 							print('Mensagem incorreta recebida de', ans_address[0],':',ans_address[1])
 						data, ans_address = sock.recvfrom(500)
@@ -116,12 +116,13 @@ def main():
 						try:
 							ans_typ = struct.unpack('!H', data[:2])[0]
 							ans_numsq = struct.unpack('!I', data[2:6])[0]
-							'''if(ans_typ == 9 and ans_numsq == numsq):
+							if(ans_typ == 9 and ans_numsq == numsq):
 								ans_value = data[6:].decode()
-								print(ans_value, ans_address[0],':',ans_address[1])
+								#print(ans_value, ans_address[0],':',ans_address[1])
+								print(ans_value)
 							else:
 								print('Mensagem incorreta recebida de', ans_address[0],':',ans_address[1])
-							data, ans_address = sock.recvfrom(500)'''
+							data, ans_address = sock.recvfrom(500)
 						except socket.timeout:
 							break
 				# Timed out twice

@@ -77,17 +77,27 @@ def main():
 
 		# TOPO REQ
 		elif(typ == 6):
+			print("TOPOREQ")
 			numsq = struct.unpack('!I', data[2:6])[0]
 			# Not seen this req
 			if(address not in seen_req.keys() or seen_req[address] != numsq):
 # ERRO AQUI IP ORIGEM
 				ip4bytes = socket.inet_aton(address[0])
 				#topoflood = struct.pack('!H', 8) + struct.pack('!H', 3) + struct.pack('!I', numsq) + address[0].encode() + struct.pack('!H', address[1])
-				topoflood = struct.pack('!H', 8) + struct.pack('!H', 3) + struct.pack('!I', numsq) + ip4bytes + struct.pack('!H', address[1])
+				#topoflood = struct.pack('!H', 8) + struct.pack('!H', 3) + struct.pack('!I', numsq) + ip4bytes + struct.pack('!H', address[1])
+				#topoflood com a info no final (ip:porto do servent)
+				ipsend = ":".join((ip_origem,str(port)))
+				print("IPSEND: ",ipsend)
+				topoflood = struct.pack('!H', 8) + struct.pack('!H', 3) + struct.pack('!I', numsq) + ip4bytes + struct.pack('!H', address[1]) + \
+				 ipsend.encode()
 				seen_req[address] = numsq
 				for peer in connections:
 					if( peer != address ):
 						sock.sendto(topoflood, peer)
+				#servent envia pro client
+				origem = (address[0], address[1])
+				answer = struct.pack('!H', 9) + struct.pack('!I', numsq) + topoflood[14:]
+				sock.sendto(answer, origem)
 
 		#  FLOOD
 		elif(typ == 7 or typ == 8):
@@ -112,8 +122,11 @@ def main():
 			# TOPO FLOOD
 			elif(typ == 8):
 				#answer = struct.pack('!H', 9) + struct.pack('!I', numsq) + data[6:] + my_address[0].encode() + struct.pack('!H', my_address[1])
-				ip4bytes = socket.inet_aton(my_address[0])
-				answer = struct.pack('!H', 9) + struct.pack('!I', numsq) + data[6:] + ip4bytes + struct.pack('!H', my_address[1])
+				#ip4bytes = socket.inet_aton(my_address[0])
+				ipsend = ":".join((ip_origem,str(my_address[1])))
+				print("IPSEND: ",ipsend)
+				ipsend = " " + ipsend
+				answer = struct.pack('!H', 9) + struct.pack('!I', numsq) + data[14:] + ipsend.encode()
 				sock.sendto(answer, origem)
 			# FLOOD
 			if(ttl > 0):
@@ -123,8 +136,11 @@ def main():
 				#flood = struct.pack('!H', typ) + struct.pack('!H', ttl) + struct.pack('!I', numsq) + origem[0].encode() + struct.pack('!H', origem[1]) + data[14:]
 				flood = struct.pack('!H', typ) + struct.pack('!H', ttl) + struct.pack('!I', numsq) + \
 				ip4bytes + struct.pack('!H', origem[1]) + data[14:]
-				#if(typ == 8):
+				if(typ == 8):
 					#colocar um espaço e o meu ip no final como string ip:port
+					ipsend1 = ":".join((origem[0],str(port)))
+					ipsend1 = " " + ipsend1
+					flood += ipsend1.encode()
 
 				for peer in connections:
 					if( peer != address ):
