@@ -87,6 +87,46 @@ def main():
 			sock.sendto(toporeq, address)
 			# Answer
 			# RECEBER A RESPOSTA IGUAL NO KEY REQ (ONDE TEM #ANSWER ATE O FINAL)
+			try:
+				data, ans_address = sock.recvfrom(500)
+				# Recvd answer
+				while(1):
+					try:
+						ans_typ = struct.unpack('!H', data[:2])[0]
+						ans_numsq = struct.unpack('!I', data[2:6])[0]
+						if(ans_typ == 9 and ans_numsq == numsq):
+							length = len(data[6:])
+							#ans_value = data[6:].decode()
+							#print(ans_value, ans_address[0],':',ans_address[1])
+						else:
+							print('Mensagem incorreta recebida de', ans_address[0],':',ans_address[1])
+						data, ans_address = sock.recvfrom(500)
+					except socket.timeout:
+						break
+
+			# Timed out once
+			except socket.timeout:
+				numsq = numsq + 1
+				toporeq = struct.pack('!H', 6) + struct.pack('!I', numsq)
+				sock.sendto(toporeq, address)
+				try:
+					data, ans_address = sock.recvfrom(500)
+					# Recvd answer
+					while(1):
+						try:
+							ans_typ = struct.unpack('!H', data[:2])[0]
+							ans_numsq = struct.unpack('!I', data[2:6])[0]
+							'''if(ans_typ == 9 and ans_numsq == numsq):
+								ans_value = data[6:].decode()
+								print(ans_value, ans_address[0],':',ans_address[1])
+							else:
+								print('Mensagem incorreta recebida de', ans_address[0],':',ans_address[1])
+							data, ans_address = sock.recvfrom(500)'''
+						except socket.timeout:
+							break
+				# Timed out twice
+				except socket.timeout:
+					print('Nenhuma resposta recebida')
 
 	sock.close()
 
