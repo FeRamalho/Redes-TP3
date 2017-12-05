@@ -100,14 +100,14 @@ def main():
 			if(typ == 7):
 				reqkey = data[14:].decode()
 				if(reqkey in keys.keys()):
-					if(origem not in seen_req.keys() or seen_req[origem] != numsq ): ##################################
-						seen_req[origem] = numsq #################################
+					if(origem not in seen_req.keys() or seen_req[origem] != numsq ): ###check if seen this client
+						seen_req[origem] = numsq ###att seen_req
 						answer = struct.pack('!H', 9) + struct.pack('!I', numsq) + keys[reqkey].encode()
 						sock.sendto(answer, origem)
 			# TOPO FLOOD
 			elif(typ == 8):
-				if(origem not in seen_req.keys() or seen_req[origem] != numsq ): ##################################
-					seen_req[origem] = numsq #################################
+				if(origem not in seen_req.keys() or seen_req[origem] != numsq ): ###check if seen this client
+					seen_req[origem] = numsq ###att seen_req
 ### VER SE O IP TA CERTO AQUI
 					ipsend = ":".join((ip_origem,str(my_address[1])))
 					ipsend = " " + ipsend
