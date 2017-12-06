@@ -13,7 +13,8 @@ def main():
 	sock.settimeout(4)
 
 	# Socket to servlet address
-	address = ('localhost', port)
+	#address = ('localhost', port)
+	address = (ip, port)
 
 	numsq = 0
 	# Client

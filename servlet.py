@@ -9,10 +9,10 @@ def main():
 	input_name = sys.argv[2]
 	peer_list = []
 	for peer in range(3, len(sys.argv)):
-		print(peer)
 		peer_list.append(sys.argv[peer])
-	print('Starting at port-', port,'\n','Reading file-',input_name)
-
+	host = socket.gethostbyname(socket.gethostname())
+	print("IP:",host)
+	print('Port:', port)
 	# DICT
 	keys = {}
 	connections = []
@@ -35,9 +35,9 @@ def main():
 
 	# Create udp socket
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
 	# Bind socket to port
-	my_address = ('127.0.0.1', port)
+	#my_address = ('127.0.0.1', port)
+	my_address = (host, port)
 	sock.bind(my_address)
 
 	# Start application
@@ -51,7 +51,6 @@ def main():
 		if(typ == 5):
 			numsq = struct.unpack('!I', data[2:6])[0]
 			reqkey = data[6:].decode()
-			print(reqkey)
 			if(reqkey in keys.keys()):
 				answer = struct.pack('!H', 9) + struct.pack('!I', numsq) + keys[reqkey].encode()
 				sock.sendto(answer, address)
@@ -71,7 +70,6 @@ def main():
 			# Not seen this req
 			if(address not in seen_req.keys() or seen_req[address] != numsq):
 				ip4bytes = socket.inet_aton(address[0])
-				#topoflood = struct.pack('!H', 8) + struct.pack('!H', 3) + struct.pack('!I', numsq) + ip4bytes + struct.pack('!H', address[1])
 				#topoflood com a info no final (ip:porto do servent)
 				ipsend = ":".join((ip_origem,str(port)))
 				topoflood = struct.pack('!H', 8) + struct.pack('!H', 3) + struct.pack('!I', numsq) + ip4bytes + struct.pack('!H', address[1]) + \
@@ -90,9 +88,7 @@ def main():
 			ttl = struct.unpack('!H', data[2:4])[0]
 			numsq = struct.unpack('!I', data[4:8])[0]
 			ip_origem = socket.inet_ntoa(data[8:12])
-			#print('flood de ip origem = ', ip_origem)
 			port_origem = struct.unpack('!H', data[12:14])[0]
-			#print('port origem = ', port_origem)
 			origem = (ip_origem, port_origem)
 			# KEY FLOOD
 			if(typ == 7):
@@ -106,8 +102,7 @@ def main():
 			elif(typ == 8):
 				if(origem not in seen_req.keys() or seen_req[origem] != numsq ): ###check if seen this client
 					seen_req[origem] = numsq ###att seen_req
-### VER SE O IP TA CERTO AQUI
-					ipsend = ":".join((ip_origem,str(my_address[1])))
+					ipsend = ":".join((host,str(my_address[1])))
 					ipsend = " " + ipsend
 					answer = struct.pack('!H', 9) + struct.pack('!I', numsq) + data[14:] + ipsend.encode()
 					sock.sendto(answer, origem)
@@ -119,8 +114,7 @@ def main():
 				ip4bytes + struct.pack('!H', origem[1]) + data[14:]
 				if(typ == 8):
 					#colocar um espaço e o meu ip no final como string ip:port
-### VER SE O IP TA CERTO AQUI
-					ipsend1 = ":".join((origem[0],str(port)))
+					ipsend1 = ":".join((host,str(port)))
 					ipsend1 = " " + ipsend1
 					flood += ipsend1.encode()
 

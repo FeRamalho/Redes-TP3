@@ -39,9 +39,10 @@
 			\newline Ao ler um T, o cliente envia uma requisição ao servlet para saber a topologia da rede. Ele então espera pela resposta, assim como na consulta pela chave. Ele vai mostrar a resposta que receber de cada servlet na tela, que contém todos os nós que passaram por eles até chegar no servlet que mandou a mensagem para o cliente.
 		\subsection{Servlet}
 			O servlet recebe as requisições do cliente e envia as respostas. Caso seja uma requisição de chave ele envia o valor (caso tenha a chave em seu banco). Caso seja uma requisição de topologia da rede ele envia uma mensagem com seu IP:PORTO.
-			Por outro lado, a parte mais importante do servlet é a inundação. Quando o servlet faz o envio da mensagem de reposta para o cliente, ele também inicia uma inundação enviando uma mensagem com a chave desejada ou com a requisição de topologia com o endereço do cliente que fez a requisição inicial. Assim, todos os outros servlets que receberem também podem responder o cliente com os valores da chave ou com o seu IP:PORTO anexado ao fim da mensagem de resposta.
+			Por outro lado, a parte mais importante do servlet é a inundação. Quando o servlet faz o envio da mensagem de reposta para o cliente, ele também inicia uma inundação enviando uma mensagem com a chave desejada ou com a requisição de topologia com o endereço do cliente que fez a requisição inicial. Assim, todos os outros servlets que receberem também podem responder o cliente com os valores da chave ou com o seu IP:PORTO anexado ao fim da mensagem de resposta. O IP:PORTO é adicionado no campo chave da resposta para o cliente e no campo info da mensagem de flood e é sempre uma string. Caso um servlet já tenha recebido aquele requerimento, ele apenas manda para os seus vizinhos, não enviando mensagem nenhuma ao cliente.
 			\newline Mesmo se um servlet é vizinho do outro de acordo com a lista recebida, se ele não estiver ligado, ele não aparece na topologia.
-			\newline Obs: O servlet é rodado no IP local, por isso na hora de fazer o bind do socket na porta recebida, ele já é feito no IP 127.0.0.1.
+			\newline Obs: O servlet é rodado no IP local, por isso na hora de fazer o bind do socket na porta recebida, pegou-se o IP através da função socket.gethostbyname(socket.gethostname()), assim como foi sugerido no fórum da disciplina. Nos testes feitos, o IP recebido por essa função foi o 127.0.1.1, então ele foi usado também na hora de rodar o client.
+			\newline Para facilitar o uso do programa para descobrir o IP, quando o servlet é iniciado, o IP de onde ele está rodando é mostrado no terminal.
 		\subsection{Formato das mensagens}
 \begin{itemize}
 
@@ -53,9 +54,10 @@
 \section{Funcionamento}
 Esse TP foi desenvolvido em Python3.
 \newline O servlet deve ser rodado da seguinte forma:
-\newline python3 servlet.py <porto-local> <arquivo-banco-chave> [ip1:porto1 ip2:porto2 ...]
+\newline \$ python3 servlet.py <porto-local> <arquivo-banco-chave> [ip1:porto1 ip2:porto2 ...]
+\newline Onde o último argumento é uma lista dos vizinhos separados por um espaço. Por exemplo: 127.0.1.1:5151 127.0.1.1:5152 127.0.1.1:5153
 \newline Já o cliente deve ser rodado assim:
-\newline python3 client.py <ip:porto>
+\newline \$ python3 client.py <ip:porto>
 		\section{Testes}
 			Os testes foram feitos usando topologias de redes diferentes com servlets usando arquivos de chaves-valor diferentes. Assim foi possível verificar a corretude do programa de maneira mais eficiente.
 			\newline Todos os testes foram rodados com servlets com IP local (127.0.0.1) e portas diferentes. Para facilitar a representação dos testes nas imagens, cada servidor é distinguido apenas pela porta usada. Alguns dos testes feitos para verificar a topologia foram os seguintes:
@@ -66,7 +68,7 @@ Esse TP foi desenvolvido em Python3.
 			   \item Topologia onde com servidores 5151, 5152, 5153, 5154 e 5155. Cada um é vizinho do próximo, e o 5152 também é vizinho do 5155. O resultado recebido é: \\ 5151 \\ 5151 -> 5152 \\ 5151 -> 5152 -> 5153 \\ 5151 -> 5152 -> 5155 \\ 5151 -> 5152 -> 5153 -> 5154 \\
 			   \includegraphics[width=5cm,height=5cm]{redes3.png}
 			\end{itemize}
-			Os testes para os dados chave-valor foram feitos modificando os arquivos de entrada para cada servlet. Alguns arquivos tinham a mesma chave porém com valor diferente. Os resultados foram satisfatórios.
+			Os testes para os dados chave-valor foram feitos modificando os arquivos de entrada para cada servlet. Alguns arquivos tinham a mesma chave porém com valor diferente. Também foram feitos testes com o programa de outra dupla (Breno Rodrigues e Davi Faria). Os resultados foram satisfatórios.
 		\section{Conclusão} 
-			Foi implementado um sistema peer-to-peer usando o protocolo UDP na linguagem python. Com isso, foram notadas as principais diferenças entre UDP e TCP como a forma de conectar-se ao porto e a troca de mensagens. Além disso, foi usado inundação e notou-se que o processo é 
+			Foi implementado um sistema peer-to-peer usando o protocolo UDP na linguagem python. Com isso, foram notadas as principais diferenças entre UDP e TCP como a forma de conectar-se ao porto e a troca de mensagens. Além disso, foi usado inundação e notou-se que o processo é gradual, onde cada nó vai recebendo as mensagens pois está conectado a outros. Notou-se também que a distância entre um nó e outro influencia na topologia enviada ao cliente, uma vez que nós mais perto do servlet ligado ao cliente receberão a requisição mais rápido e, mesmo eles estando conectados a outros nós, a mesma requisição vai chegar depois.
 \end{document}
