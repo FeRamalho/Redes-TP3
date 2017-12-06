@@ -40,6 +40,7 @@
 		\subsection{Servlet}
 			O servlet recebe as requisições do cliente e envia as respostas. Caso seja uma requisição de chave ele envia o valor (caso tenha a chave em seu banco). Caso seja uma requisição de topologia da rede ele envia uma mensagem com seu IP:PORTO.
 			Por outro lado, a parte mais importante do servlet é a inundação. Quando o servlet faz o envio da mensagem de reposta para o cliente, ele também inicia uma inundação enviando uma mensagem com a chave desejada ou com a requisição de topologia com o endereço do cliente que fez a requisição inicial. Assim, todos os outros servlets que receberem também podem responder o cliente com os valores da chave ou com o seu IP:PORTO anexado ao fim da mensagem de resposta.
+			\newline Mesmo se um servlet é vizinho do outro de acordo com a lista recebida, se ele não estiver ligado, ele não aparece na topologia.
 			\newline Obs: O servlet é rodado no IP local, por isso na hora de fazer o bind do socket na porta recebida, ele já é feito no IP 127.0.0.1.
 		\subsection{Formato das mensagens}
 \begin{itemize}
@@ -52,11 +53,20 @@
 \section{Funcionamento}
 Esse TP foi desenvolvido em Python3.
 \newline O servlet deve ser rodado da seguinte forma:
-\newline python3 servlet.py <porto-local> <arquivo-banco-chave> [ip1:porto1[ip2:porto2...]]
+\newline python3 servlet.py <porto-local> <arquivo-banco-chave> [ip1:porto1 ip2:porto2 ...]
 \newline Já o cliente deve ser rodado assim:
 \newline python3 client.py <ip:porto>
 		\section{Testes}
 			Os testes foram feitos usando topologias de redes diferentes com servlets usando arquivos de chaves-valor diferentes. Assim foi possível verificar a corretude do programa de maneira mais eficiente.
+			\newline Todos os testes foram rodados com servlets com IP local (127.0.0.1) e portas diferentes. Para facilitar a representação dos testes nas imagens, cada servidor é distinguido apenas pela porta usada. Alguns dos testes feitos para verificar a topologia foram os seguintes:
+			\begin{itemize}
+			    \item Topologia onde o servidor de porta 5151 (que está ligado ao cliente) é vizinho direto dos outros servidores, e os outros são vizinhos de cada um. O resultado recebido pelo cliente é: \\ 5151 \\ 5151 -> 5152 \\ 5151 -> 5153 \\ \includegraphics[width=6cm,height=4cm]{redes1.png}
+			    \item Topologia onde o servidor de porta 5151 é vizinho de 5152 e 5154. O servidor 5152 é vizinho de 5153. O servidor 5154 é vizinho de 5151 e 5153. O resultado recebido é: \\ 5151 \\ 5151 -> 5152 \\ 5151 -> 5154 \\ 5151 -> 5152 -> 5153 \\
+			   \includegraphics[width=6cm,height=5cm]{redes2.png}
+			   \item Topologia onde com servidores 5151, 5152, 5153, 5154 e 5155. Cada um é vizinho do próximo, e o 5152 também é vizinho do 5155. O resultado recebido é: \\ 5151 \\ 5151 -> 5152 \\ 5151 -> 5152 -> 5153 \\ 5151 -> 5152 -> 5155 \\ 5151 -> 5152 -> 5153 -> 5154 \\
+			   \includegraphics[width=5cm,height=5cm]{redes3.png}
+			\end{itemize}
+			Os testes para os dados chave-valor foram feitos modificando os arquivos de entrada para cada servlet. Alguns arquivos tinham a mesma chave porém com valor diferente. Os resultados foram satisfatórios.
 		\section{Conclusão} 
 			Foi implementado um sistema peer-to-peer usando o protocolo UDP na linguagem python. Com isso, foram notadas as principais diferenças entre UDP e TCP como a forma de conectar-se ao porto e a troca de mensagens. Além disso, foi usado inundação e notou-se que o processo é 
 \end{document}
