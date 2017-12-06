@@ -7,8 +7,10 @@ def main():
 	# Input arguments
 	port = int(sys.argv[1])
 	input_name = sys.argv[2]
-	peer_list = sys.argv[3]
-	#print(port,'\n',input_name,'\n',peer_list)
+	peer_list = []
+	for peer in range(3, len(sys.argv)):
+		print(peer)
+		peer_list.append(sys.argv[peer])
 	print('Starting at port-', port,'\n','Reading file-',input_name)
 
 	# DICT
@@ -16,14 +18,10 @@ def main():
 	connections = []
 	seen_req = {}
 
-	# Peer connections    peer_list = string   connections  = tupla
-	peer_list = peer_list.replace('[', ' ')
-	peer_list = peer_list.replace(']', '')
-	peer_list = peer_list.split()
+	# Peer connections    peer_list = string   connections  =
 	for peer in peer_list:
 		peer_ip, x , peer_port = peer.partition(':')
 		connections.append( (peer_ip, int(peer_port)) )
-	
 	# Reading keys from input
 	input_file = open(input_name, 'r')
 	for line in input_file:
@@ -59,7 +57,7 @@ def main():
 				sock.sendto(answer, address)
 			# Not seen this req
 			if(address not in seen_req.keys() or [address] != numsq):
-				ip4bytes = socket.inet_aton(address[0]) 
+				ip4bytes = socket.inet_aton(address[0])
 				keyflood = struct.pack('!H', 7) + struct.pack('!H', 3) + struct.pack('!I', numsq) + \
 				ip4bytes + struct.pack('!H', address[1]) + reqkey.encode()
 				seen_req[address] = numsq
